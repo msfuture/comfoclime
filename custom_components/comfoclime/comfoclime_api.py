@@ -111,14 +111,11 @@ class ComfoClimeAPI:
                 byte_count,
             )
 
-    def read_property_for_device(
+    def read_property_for_device_raw(
         self,
         device_uuid: str,
-        property_path: str,
-        faktor: float = 1.0,
-        signed: bool = True,
-        byte_count: int | None = None,
-    ):
+        property_path: str
+    ) -> None | list:
         url = f"{self.base_url}/device/{device_uuid}/property/{property_path}"
         try:
             response = requests.get(url, timeout=5)
@@ -131,9 +128,21 @@ class ComfoClimeAPI:
         data = payload.get("data")
         if not isinstance(data, list) or not data:
             raise ValueError("Unerwartetes Property-Format")
+        return data
 
-        if byte_count is None:
+    def read_property_for_device(
+        self,
+        device_uuid: str,
+        property_path: str,
+        faktor: float = 1.0,
+        signed: bool = True,
+        byte_count: int | None = None,
+    ) -> None | str | float:
+        data = self.read_property_for_device_raw(device_uuid, property_path)
+        if byte_count is None and data:
             byte_count = len(data)
+        else:
+            return None
 
         if byte_count == 1:
             value = data[0]
@@ -144,6 +153,11 @@ class ComfoClimeAPI:
             value = lsb + (msb << 8)
             if signed and value >= 0x8000:
                 value -= 0x10000
+        elif byte_count > 2:
+            if len(data) != byte_count:
+                raise ValueError(f"Unerwartete Byte-Anzahl: erwartet {byte_count}, erhalten {len(data)}")
+            if all(0 <= byte < 256 for byte in data):
+                return "".join(chr(byte) for byte in data if byte != 0)
         else:
             raise ValueError(f"Nicht unterstützte Byte-Anzahl: {byte_count}")
 
@@ -228,7 +242,6 @@ class ComfoClimeAPI:
             "scenarioTimeLeft": None,
             "season": None,
             "schedule": None,
-            "setPointTemperature": None,
         }
         headers = {"content-type": "application/json; charset=utf-8"}
         url = f"{self.base_url}/system/{self.uuid}/dashboard"
