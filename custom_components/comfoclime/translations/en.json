@@ -217,6 +217,28 @@
                 "high": "High"
             }
         }
+      },
+      "climate": {
+        "climate": {
+            "name": "Climate Control",
+            "state_attributes": {
+                "preset_mode": {
+                    "state": {
+                        "comfort": "Comfort",
+                        "power": "Power",
+                        "eco": "Eco"
+                    }
+                },
+                "fan_mode": {
+                    "state": {
+                        "auto": "Auto",
+                        "low": "Low",
+                        "medium": "Medium",
+                        "high": "High"
+                    }
+                }
+            }
+        }
       }
     },
     "config": {

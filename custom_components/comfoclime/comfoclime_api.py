@@ -8,6 +8,23 @@ import requests
 _LOGGER = logging.getLogger(__name__)
 
 
+# Exception classes as per ComfoClimeAPI.md documentation
+class ComfoClimeError(Exception):
+    """Base exception for ComfoClime API errors."""
+
+
+class ComfoClimeConnectionError(ComfoClimeError):
+    """Exception for connection errors."""
+
+
+class ComfoClimeTimeoutError(ComfoClimeError):
+    """Exception for timeout errors."""
+
+
+class ComfoClimeAuthenticationError(ComfoClimeError):
+    """Exception for authentication errors."""
+
+
 class ComfoClimeAPI:
     def __init__(self, base_url):
         self.base_url = base_url.rstrip("/")
@@ -227,19 +244,14 @@ class ComfoClimeAPI:
     def set_device_setting(self, temperature_profile=None, fan_speed=None):
         if not self.uuid:
             self.get_uuid()
+        # Only include fields documented in the ComfoClime API spec
+        # Fields like scenario, scenarioTimeLeft, @type, name, displayName, description, timestamp, status
+        # are NOT part of the official API and should not be included
         payload = {
-            "@type": None,
-            "name": None,
-            "displayName": None,
-            "description": None,
-            "timestamp": datetime.datetime.now().isoformat(),
-            "status": None,
             "setPointTemperature": None,
             "temperatureProfile": temperature_profile,
             "seasonProfile": None,
             "fanSpeed": fan_speed,
-            "scenario": None,
-            "scenarioTimeLeft": None,
             "season": None,
             "schedule": None,
         }
@@ -324,3 +336,122 @@ class ComfoClimeAPI:
         response = requests.put(url, timeout=5)
         response.raise_for_status()
         return response.status_code == 200
+
+    # ============================================================================
+    # Standardized API endpoints as per ComfoClimeAPI.md documentation
+    # ============================================================================
+
+    async def async_set_temperature(self, hass, temperature: float, season: str = None):
+        """Set target temperature via standardized API endpoint."""
+        async with self._request_lock:
+            return await hass.async_add_executor_job(self.set_temperature, temperature, season)
+
+    def set_temperature(self, temperature: float, season: str = None):
+        """Set target temperature."""
+        payload = {"temperature": temperature}
+        if season:
+            payload["season"] = season
+
+        url = f"{self.base_url}/api/temperature"
+        try:
+            response = requests.post(url, json=payload, timeout=5)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.ConnectionError as e:
+            raise ComfoClimeConnectionError(f"Connection failed: {e}") from e
+        except requests.exceptions.Timeout as e:
+            raise ComfoClimeTimeoutError(f"Request timed out: {e}") from e
+        except requests.exceptions.HTTPError as e:
+            if response.status_code == 401:
+                raise ComfoClimeAuthenticationError(f"Authentication failed: {e}") from e
+            raise ComfoClimeError(f"HTTP error: {e}") from e
+
+    async def async_set_hvac_mode(self, hass, mode: str):
+        """Set HVAC mode via standardized API endpoint."""
+        async with self._request_lock:
+            return await hass.async_add_executor_job(self.set_hvac_mode, mode)
+
+    def set_hvac_mode(self, mode: str):
+        """Set HVAC mode."""
+        payload = {"mode": mode}
+
+        url = f"{self.base_url}/api/hvac_mode"
+        try:
+            response = requests.post(url, json=payload, timeout=5)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.ConnectionError as e:
+            raise ComfoClimeConnectionError(f"Connection failed: {e}") from e
+        except requests.exceptions.Timeout as e:
+            raise ComfoClimeTimeoutError(f"Request timed out: {e}") from e
+        except requests.exceptions.HTTPError as e:
+            if response.status_code == 401:
+                raise ComfoClimeAuthenticationError(f"Authentication failed: {e}") from e
+            raise ComfoClimeError(f"HTTP error: {e}") from e
+
+    async def async_set_preset(self, hass, preset: str):
+        """Set preset mode via standardized API endpoint."""
+        async with self._request_lock:
+            return await hass.async_add_executor_job(self.set_preset, preset)
+
+    def set_preset(self, preset: str):
+        """Set preset mode."""
+        payload = {"preset": preset}
+
+        url = f"{self.base_url}/api/preset"
+        try:
+            response = requests.post(url, json=payload, timeout=5)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.ConnectionError as e:
+            raise ComfoClimeConnectionError(f"Connection failed: {e}") from e
+        except requests.exceptions.Timeout as e:
+            raise ComfoClimeTimeoutError(f"Request timed out: {e}") from e
+        except requests.exceptions.HTTPError as e:
+            if response.status_code == 401:
+                raise ComfoClimeAuthenticationError(f"Authentication failed: {e}") from e
+            raise ComfoClimeError(f"HTTP error: {e}") from e
+
+    async def async_set_fan_speed(self, hass, speed: int):
+        """Set fan speed via standardized API endpoint."""
+        async with self._request_lock:
+            return await hass.async_add_executor_job(self.set_fan_speed, speed)
+
+    def set_fan_speed(self, speed: int):
+        """Set fan speed."""
+        payload = {"speed": speed}
+
+        url = f"{self.base_url}/api/fan_speed"
+        try:
+            response = requests.post(url, json=payload, timeout=5)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.ConnectionError as e:
+            raise ComfoClimeConnectionError(f"Connection failed: {e}") from e
+        except requests.exceptions.Timeout as e:
+            raise ComfoClimeTimeoutError(f"Request timed out: {e}") from e
+        except requests.exceptions.HTTPError as e:
+            if response.status_code == 401:
+                raise ComfoClimeAuthenticationError(f"Authentication failed: {e}") from e
+            raise ComfoClimeError(f"HTTP error: {e}") from e
+
+    async def async_get_status(self, hass):
+        """Get all current values and states via standardized API endpoint."""
+        async with self._request_lock:
+            return await hass.async_add_executor_job(self.get_status)
+
+    def get_status(self):
+        """Get all current values and states."""
+        url = f"{self.base_url}/api/status"
+        try:
+            response = requests.get(url, timeout=5)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.ConnectionError as e:
+            raise ComfoClimeConnectionError(f"Connection failed: {e}") from e
+        except requests.exceptions.Timeout as e:
+            raise ComfoClimeTimeoutError(f"Request timed out: {e}") from e
+        except requests.exceptions.HTTPError as e:
+            if response.status_code == 401:
+                raise ComfoClimeAuthenticationError(f"Authentication failed: {e}") from e
+            raise ComfoClimeError(f"HTTP error: {e}") from e

@@ -126,7 +126,8 @@ class ComfoClimeSelect(
 
         try:
             if self._key == "temperatureProfile":
-                self._api.set_device_setting(value)
+                # Use working API method for temperature profile (preset mode)
+                self._api.set_device_setting(temperature_profile=value)
             else:
                 section = self._key_path[0]
                 key = self._key_path[1]

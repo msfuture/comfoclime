@@ -86,6 +86,25 @@ class ComfoClimeTemperatureNumber(
         self._attr_has_entity_name = True
 
     @property
+    def available(self):
+        """Return True if entity is available."""
+        # For manual temperature setting, check if automatic mode is disabled
+        if self._key_path[0] == "temperature" and self._key_path[1] == "manualTemperature":
+            try:
+                coordinator_data = self.coordinator.data
+                automatic_temperature_status = coordinator_data.get("temperature", {}).get("status")
+                
+                # Only available if automatic mode is disabled (status = 0)
+                return automatic_temperature_status == 0
+            except Exception as e:
+                _LOGGER.debug(f"Could not check automatic temperature status for availability: {e}")
+                # Return True if we can't determine the status to avoid breaking functionality
+                return True
+        
+        # For all other temperature entities, use default availability
+        return True
+
+    @property
     def native_value(self):
         return self._value
 
@@ -135,6 +154,21 @@ class ComfoClimeTemperatureNumber(
         self.async_write_ha_state()
 
     def set_native_value(self, value: float):
+        # Check if this is a manual temperature setting
+        if self._key_path[0] == "temperature" and self._key_path[1] == "manualTemperature":
+            # Check if automatic comfort temperature is enabled
+            try:
+                coordinator_data = self.coordinator.data
+                automatic_temperature_status = coordinator_data.get("temperature", {}).get("status")
+                
+                if automatic_temperature_status == 1:
+                    _LOGGER.warning(f"Cannot set manual temperature: automatic comfort temperature is enabled")
+                    # Don't proceed with setting the temperature
+                    return
+            except Exception as e:
+                _LOGGER.warning(f"Could not check automatic temperature status: {e}")
+                # Proceed anyway if we can't determine the status
+
         section = self._key_path[0]
         key = self._key_path[1]
 

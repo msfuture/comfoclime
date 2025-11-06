@@ -45,7 +45,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     }
 
     await hass.config_entries.async_forward_entry_setups(
-        entry, ["sensor", "switch", "number", "select", "fan"]
+        entry, ["sensor", "switch", "number", "select", "fan", "climate"]
     )
 
     async def handle_set_property_service(call: ServiceCall):
@@ -98,6 +98,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     await hass.config_entries.async_forward_entry_unload(entry, "number")
     await hass.config_entries.async_forward_entry_unload(entry, "select")
     await hass.config_entries.async_forward_entry_unload(entry, "fan")
+    await hass.config_entries.async_forward_entry_unload(entry, "climate")
     hass.data[DOMAIN].pop(entry.entry_id)
     return True
 

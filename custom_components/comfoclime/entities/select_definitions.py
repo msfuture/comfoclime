@@ -9,7 +9,7 @@ SELECT_ENTITIES = [
         "key": "season.season",
         "name": "Season Mode",
         "translation_key": "season_mode",
-        "options": {1: "heating", 0: "transition", 2: "cooling"},
+        "options": {1: "heating", 0: "transitional", 2: "cooling"},
     },
 ]
 
