@@ -223,7 +223,7 @@ class ComfoClimeClimate(CoordinatorEntity[ComfoClimeDashboardCoordinator], Clima
 
     @property
     def max_temp(self) -> float:
-        """Return maximum temperature as per Copilot instructions."""
+        """Return maximum temperature as per system requirements."""
         return 30.0
 
     @property
