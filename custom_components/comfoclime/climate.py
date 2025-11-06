@@ -510,7 +510,7 @@ class ComfoClimeClimate(CoordinatorEntity[ComfoClimeDashboardCoordinator], Clima
         """Set fan mode by updating fan speed in dashboard.
 
         Maps fan mode strings to fanSpeed values:
-        - auto: 0
+        - off: 0
         - low: 1
         - medium: 2
         - high: 3
