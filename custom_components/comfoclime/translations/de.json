@@ -1,282 +1,287 @@
 {
     "entity": {
-      "sensor": {
-        "indoor_temperature": {
-          "name": "Innentemperatur"
-        },
-        "outdoor_temperature": {
-            "name": "Außentemperatur"
-        },
-        "exhaust_temperature": {
-            "name": "Fortluft Temperatur"
-        },
-        "extract_humidity": {
-            "name": "Abluft Feuchtigkeit"
-        },
-        "exhaust_humidity": {
-            "name": "Fortluft Feuchtigkeit"
-        },
-        "outdoor_humidity": {
-            "name": "Außenluft Feuchtigkeit"
-        },
-        "supply_humidity": {
-            "name": "Zuluft Feuchtigkeit"
-        },
-        "fan_speed": {
-            "name": "Lüfterstufe"
-        },
-        "supply_air_temperature": {
-          "name": "Zulufttemperatur"
-        },
-        "supply_coil_temperature": {
-            "name": "Zuluft Gastemperatur"
-        },
-        "exhaust_coil_temperature": {
-            "name": "Abluft Gastemperatur"
-        },
-        "tpma_temperature": {
-            "name": "Mittlere Außentemperatur"
-        },
-        "current_comfort_temperature": {
-            "name": "Aktuelle Zieltemperatur"
-        },
-        "power_heatpump": {
-            "name": "Wärmepumpe Leistungsaufnahme"
-        },
-        "power_ventilation": {
-            "name": "Lüftung Leistungsaufnahme"
-        },
-        "bypass_state": {
-            "name": "Bypass Zustand"
-        },
-        "exhaust_fan_duty": {
-            "name": "Abluft Lüfter Ansteuerung"
-        },
-        "supply_fan_duty": {
-            "name": "Zuluft Lüfter Ansteuerung"
-        },
-        "exhaust_fan_speed": {
-            "name": "Abluft Lüfter Drehzahl"
-        },
-        "supply_fan_speed": {
-            "name": "Zuluft Lüfter Drehzahl"
-        },
-        "exhaust_air_flow": {
-            "name": "Abluft Volumenstrom"
-        },
-        "supply_air_flow": {
-            "name": "Zuluft Volumenstrom"
-        },
-        "energy_ytd": {
-            "name": "Lüftung Energie Jahr"
-        },
-        "energy_total": {
-            "name": "Lüftung Energie gesamt"
-        },
-        "ventilation_disbalance": {
-            "name": "Lüftung Ungleichgewicht"
-        },
-        "heat_pump_status": {
-            "name": "Wärmepumpe Status"
-        },
-        "season": {
-            "name": "Jahreszeit",
-            "state": {
-                "heating": "Heizperiode",
-                "cooling": "Kühlperiode",
-                "transitional": "Übergangszeit"
+        "sensor": {
+            "indoor_temperature": {
+                "name": "Innentemperatur"
+            },
+            "outdoor_temperature": {
+                "name": "Außentemperatur"
+            },
+            "exhaust_temperature": {
+                "name": "Fortluft Temperatur"
+            },
+            "extract_humidity": {
+                "name": "Abluft Feuchtigkeit"
+            },
+            "exhaust_humidity": {
+                "name": "Fortluft Feuchtigkeit"
+            },
+            "outdoor_humidity": {
+                "name": "Außenluft Feuchtigkeit"
+            },
+            "supply_humidity": {
+                "name": "Zuluft Feuchtigkeit"
+            },
+            "fan_speed": {
+                "name": "Lüfterstufe"
+            },
+            "supply_air_temperature": {
+                "name": "Zulufttemperatur"
+            },
+            "supply_coil_temperature": {
+                "name": "Zuluft Gastemperatur"
+            },
+            "exhaust_coil_temperature": {
+                "name": "Abluft Gastemperatur"
+            },
+            "tpma_temperature": {
+                "name": "Mittlere Außentemperatur"
+            },
+            "current_comfort_temperature": {
+                "name": "Aktuelle Zieltemperatur"
+            },
+            "power_heatpump": {
+                "name": "Wärmepumpe Leistungsaufnahme"
+            },
+            "power_ventilation": {
+                "name": "Lüftung Leistungsaufnahme"
+            },
+            "bypass_state": {
+                "name": "Bypass Zustand"
+            },
+            "exhaust_fan_duty": {
+                "name": "Abluft Lüfter Ansteuerung"
+            },
+            "supply_fan_duty": {
+                "name": "Zuluft Lüfter Ansteuerung"
+            },
+            "exhaust_fan_speed": {
+                "name": "Abluft Lüfter Drehzahl"
+            },
+            "supply_fan_speed": {
+                "name": "Zuluft Lüfter Drehzahl"
+            },
+            "exhaust_air_flow": {
+                "name": "Abluft Volumenstrom"
+            },
+            "supply_air_flow": {
+                "name": "Zuluft Volumenstrom"
+            },
+            "energy_ytd": {
+                "name": "Lüftung Energie Jahr"
+            },
+            "energy_total": {
+                "name": "Lüftung Energie gesamt"
+            },
+            "ventilation_disbalance": {
+                "name": "Lüftung Ungleichgewicht"
+            },
+            "heat_pump_status": {
+                "name": "Wärmepumpe Status"
+            },
+            "season": {
+                "name": "Jahreszeit",
+                "state": {
+                    "heating": "Heizperiode",
+                    "cooling": "Kühlperiode",
+                    "transitional": "Übergangszeit"
+                }
+            },
+            "temperature_profile_status": {
+                "name": "Aktives Temperaturprofil",
+                "state": {
+                    "comfort": "Komfort",
+                    "eco": "Eco",
+                    "power": "Power"
+                }
+            },
+            "temp_rmot": {
+                "name": "Lüftung Mittlere Außentemperatur (RMOT)"
+            },
+            "device_mode_status": {
+                "name": "Aktueller Betriebsmodus",
+                "state": {
+                    "0": "Aus",
+                    "1": "Heizen",
+                    "2": "Kühlen"
+                }
+            },
+            "schedule_status": {
+                "name": "Aktiver Zeitplan"
+            },
+            "dashboard_status": {
+                "name": "Status-Feld des Dashboard API"
+            },
+            "device_power_status": {
+                "name": "Einschaltstatus",
+                "state": {
+                    "false": "An",
+                    "true": "Standby"
+                }
+            },
+            "free_cooling_status": {
+                "name": "Free Cooling",
+                "state": {
+                    "false": "Aus",
+                    "true": "An"
+                }
             }
         },
-        "temperature_profile_status": {
-          "name": "Aktives Temperaturprofil",
-          "state": {
-            "comfort": "Komfort",
-            "eco": "Eco",
-            "power": "Power"
+        "select": {
+            "temperature_profile": {
+                "name": "Temperaturprofil",
+                "state": {
+                    "comfort": "Komfort",
+                    "eco": "Eco",
+                    "power": "Power"
+                }
+            },
+            "season_mode": {
+                "name": "Jahreszeitwahl",
+                "state": {
+                    "heating": "Heizperiode",
+                    "cooling": "Kühlperiode",
+                    "transition": "Übergangszeit"
+                }
+            },
+            "humidity_comfort_control": {
+                "name": "Lüftung Feuchteregelung",
+                "state": {
+                    "off": "Aus",
+                    "autoonly": "Nur bei Auto",
+                    "on": "An"
+                }
+            },
+            "humidity_protection": {
+                "name": "Lüftung Feuchteschutz",
+                "state": {
+                    "off": "Aus",
+                    "autoonly": "Nur bei Auto",
+                    "on": "An"
+                }
             }
         },
-        "temp_rmot": {
-            "name": "Lüftung Mittlere Außentemperatur (RMOT)"
-        },
-        "device_mode_status": {
-          "name": "Aktueller Betriebsmodus",
-          "state": {
-            "0": "Aus",
-            "1": "Heizen",
-            "2": "Kühlen"
+        "number": {
+            "heating_comfort_temperature": {
+                "name": "Komforttemperatur Heizen"
+            },
+            "heating_knee_point": {
+                "name": "Knickpunkt Heizkurve Heizen"
+            },
+            "heating_reduction_delta": {
+                "name": "Temperaturreduktion Heizen"
+            },
+            "cooling_comfort_temperature": {
+                "name": "Komforttemperatur Kühlen"
+            },
+            "cooling_knee_point": {
+                "name": "Knickpunkt Heizkurve Kühlen"
+            },
+            "cooling_temperature_limit": {
+                "name": "Temperaturlimit Kühlen"
+            },
+            "manual_comfort_temperature": {
+                "name": "Manuelle Komforttemperatur"
+            },
+            "heating_threshold": {
+                "name": "Heizgrenze"
+            },
+            "cooling_threshold": {
+                "name": "Kühlgrenze"
+            },
+            "rmot_heating_threshold": {
+                "name": "Lüftung Heizgrenze RMOT"
+            },
+            "rmot_cooling_threshold": {
+                "name": "Lüftung Kühlgrenze RMOT"
+            },
+            "heatpump_min_temp": {
+                "name": "Wärmepumpe minimale Kühltemperatur"
+            },
+            "heatpump_max_temp": {
+                "name": "Wärmepumpe maximale Heiztemperatur"
             }
         },
-        "schedule_status": {
-            "name": "Aktiver Zeitplan"
-        },
-        "dashboard_status": {
-            "name": "Status-Feld des Dashboard API"
-        },
-        "device_power_status": {
-          "name": "Einschaltstatus",
-          "state": {
-            "false": "An",
-            "true": "Standby"
+        "switch": {
+            "automatic_season_detection": {
+                "name": "Automatische Jahreszeiterkennung"
+            },
+            "automatic_comfort_temperature": {
+                "name": "Automatische Komforttemperatur"
+            },
+            "heatpump_onoff": {
+                "name": "Wärmepumpe an/aus"
             }
         },
-        "free_cooling_status": {
-          "name": "Free Cooling",
-          "state": {
-            "false": "Aus",
-            "true": "An"
-            }
-        }
-      },
-      "select": {
-        "temperature_profile": {
-          "name": "Temperaturprofil",
-          "state": {
-            "comfort": "Komfort",
-            "eco": "Eco",
-            "power": "Power"
+        "fan": {
+            "fan_speed": {
+                "name": "Lüfter Stufe",
+                "state": {
+                    "off": "Abwesend",
+                    "low": "Niedrig",
+                    "medium": "Mittel",
+                    "high": "Hoch"
+                }
             }
         },
-        "season_mode": {
-            "name": "Jahreszeitwahl",
-            "state": {
-                "heating": "Heizperiode",
-                "cooling": "Kühlperiode",
-                "transition": "Übergangszeit"
-            }
-        },
-        "humidity_comfort_control": {
-            "name": "Lüftung Feuchteregelung",
-            "state": {
-                "off": "Aus",
-                "autoonly": "Nur bei Auto",
-                "on": "An"
-            }
-        },
-        "humidity_protection": {
-            "name": "Lüftung Feuchteschutz",
-            "state": {
-                "off": "Aus",
-                "autoonly": "Nur bei Auto",
-                "on": "An"
-            }
-          }
-      },
-      "number": {
-        "heating_comfort_temperature": {
-            "name": "Komforttemperatur Heizen"
-        },
-        "heating_knee_point": {
-            "name": "Knickpunkt Heizkurve Heizen"
-        },
-        "heating_reduction_delta": {
-            "name": "Temperaturreduktion Heizen"
-        },
-        "cooling_comfort_temperature": {
-            "name": "Komforttemperatur Kühlen"
-        },
-        "cooling_knee_point": {
-            "name": "Knickpunkt Heizkurve Kühlen"
-        },
-        "cooling_temperature_limit": {
-            "name": "Temperaturlimit Kühlen"
-        },
-        "manual_comfort_temperature": {
-            "name": "Manuelle Komforttemperatur"
-        },
-        "heating_threshold": {
-            "name": "Heizgrenze"
-        },
-        "cooling_threshold": {
-            "name": "Kühlgrenze"
-        },
-        "rmot_heating_threshold": {
-            "name": "Lüftung Heizgrenze RMOT"
-        },
-        "rmot_cooling_threshold": {
-            "name": "Lüftung Kühlgrenze RMOT"
-        },
-        "heatpump_min_temp": {
-            "name": "Wärmepumpe minimale Kühltemperatur"
-        },
-        "heatpump_max_temp": {
-            "name": "Wärmepumpe maximale Heiztemperatur"
-        }
-      },
-      "switch": {
-        "automatic_season_detection": {
-            "name": "Automatische Jahreszeiterkennung"
-        },
-        "automatic_comfort_temperature": {
-            "name": "Automatische Komforttemperatur"
-        },
-        "heatpump_onoff": {
-            "name": "Wärmepumpe an/aus"
-        }
-      },
-      "fan": {
-        "fan_speed": {
-            "name": "Lüfter Stufe",
-            "state": {
-                "off": "Abwesend",
-                "low": "Niedrig",
-                "medium": "Mittel",
-                "high": "Hoch"
-            }
-        }
-      },
-      "climate": {
         "climate": {
-            "name": "Klimasteuerung",
-            "state_attributes": {
-                "preset_mode": {
-                    "state": {
-                        "comfort": "Komfort",
-                        "power": "Power",
-                        "eco": "Eco"
-                    }
-                },
-                "fan_mode": {
-                    "state": {
-                        "off": "Aus",
-                        "low": "Niedrig",
-                        "medium": "Mittel",
-                        "high": "Hoch"
+            "climate": {
+                "name": "Klimasteuerung",
+                "state_attributes": {
+                    "preset_mode": {
+                        "name": "Szenario",
+                        "state": {
+                            "comfort": "Komfort",
+                            "power": "Power",
+                            "eco": "Eco",
+                            "none": "Manuell",
+                            "cooking": "Kochen",
+                            "party": "Party",
+                            "away": "Abwesend"
+                        }
+                    },
+                    "fan_mode": {
+                        "state": {
+                            "off": "Aus",
+                            "low": "Niedrig",
+                            "medium": "Mittel",
+                            "high": "Hoch"
+                        }
                     }
                 }
             }
         }
-      }
     },
     "config": {
         "step": {
-          "user": {
-            "title": "Zehnder ComfoClime verbinden",
-            "description": "Gib die IP-Adresse oder den Hostnamen deiner ComfoClime Einheit ein",
-            "data": {
-              "host": "Host oder IP-Adresse"
+            "user": {
+                "title": "Zehnder ComfoClime verbinden",
+                "description": "Gib die IP-Adresse oder den Hostnamen deiner ComfoClime Einheit ein",
+                "data": {
+                    "host": "Host oder IP-Adresse"
+                }
             }
-          }
         },
         "error": {
             "cannot_connect": "Verbindung fehlgeschlagen.",
             "no_uuid": "Antwort erhalten, aber keine UUID gefunden.",
             "no_response": "Das Gerät hat nicht korrekt geantwortet."
         },
-          "abort": {
+        "abort": {
             "already_configured": "Dieses Gerät ist bereits konfiguriert."
         }
     },
     "options": {
         "step": {
-          "init": {
-            "title": "Optionen",
-            "description": "Erweiterte Einstellungen für die Integration",
-            "data": {
-              "enable_diagnostics": "Diagnose-Sensoren aktivieren",
-              "minimal_mode": "Keine ComfoNet Abfragen (Testzwecke)",
-              "throttle_comfonet": "Wartezeit von 10ms zwischen ComfoNet Abfragen"
+            "init": {
+                "title": "Optionen",
+                "description": "Erweiterte Einstellungen für die Integration",
+                "data": {
+                    "enable_diagnostics": "Diagnose-Sensoren aktivieren",
+                    "minimal_mode": "Keine ComfoNet Abfragen (Testzwecke)",
+                    "throttle_comfonet": "Wartezeit von 10ms zwischen ComfoNet Abfragen"
+                }
             }
-          }
         }
     }
 }

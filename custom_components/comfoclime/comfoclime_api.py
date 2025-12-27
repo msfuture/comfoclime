@@ -295,6 +295,9 @@ class ComfoClimeAPI:
         temperature_profile: int | None = None,
         season_profile: int | None = None,
         status: int | None = None,
+        scenario: int | None = None,
+        scenario_time_left: int | None = None,
+        scenario_start_delay: int | None = None,
     ) -> dict:
         """Update dashboard settings via API.
 
@@ -317,11 +320,18 @@ class ComfoClimeAPI:
             "scenarioTimeLeft": None,
             "season": season,
             "schedule": None,
+            "scenarioStartDelay": None
         }
 
         The API distinguishes between two modes:
         - Automatic mode (status=1): Uses preset profiles (seasonProfile, temperatureProfile)
         - Manual mode (status=0): Uses manual temperature (setPointTemperature)
+
+        Scenario modes:
+        - 4: Kochen (Cooking) - 30 minutes high ventilation
+        - 5: Party - 30 minutes high ventilation
+        - 7: Urlaub (Holiday) - 24 hours reduced mode
+        - 8: Boost - 30 minutes maximum power
 
         Args:
             set_point_temperature: Target temperature (°C) - activates manual mode
@@ -332,6 +342,9 @@ class ComfoClimeAPI:
             temperature_profile: Temperature profile/preset (0=comfort, 1=boost, 2=eco)
             season_profile: Season profile/preset (0=comfort, 1=boost, 2=eco)
             status: Temperature control mode (0=manual, 1=automatic)
+            scenario: Scenario mode (4=Kochen, 5=Party, 7=Urlaub, 8=Boost)
+            scenario_time_left: Duration for scenario in seconds (e.g., 1800 for 30min)
+            scenario_start_delay: Start delay for scenario in seconds (optional)
 
         Returns:
             Response JSON from the API
@@ -376,6 +389,12 @@ class ComfoClimeAPI:
             payload["status"] = status
         if hp_standby is not None:
             payload["hpStandby"] = hp_standby
+        if scenario is not None:
+            payload["scenario"] = scenario
+        if scenario_time_left is not None:
+            payload["scenarioTimeLeft"] = scenario_time_left
+        if scenario_start_delay is not None:
+            payload["scenarioStartDelay"] = scenario_start_delay
 
         if not payload:
             _LOGGER.debug(
