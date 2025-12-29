@@ -180,8 +180,15 @@ class ComfoClimeClimate(
 
     @property
     def available(self) -> bool:
-        """Return True if entity is available."""
-        return self.coordinator.last_update_success
+        """Return True if entity is available.
+
+        Climate entity depends on both dashboard and thermal profile coordinators,
+        so we check both for successful updates.
+        """
+        return (
+            self.coordinator.last_update_success
+            or self._thermalprofile_coordinator.last_update_success
+        )
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -251,54 +258,46 @@ class ComfoClimeClimate(
         return HVAC_MODE_MAPPING.get(season, HVACMode.OFF)
 
     @property
-    def hvac_action(self) -> HVACAction:
+    def hvac_action(self) -> list[HVACAction]:
         """Return current HVAC action based on dashboard heatPumpStatus.
 
-        Uses bitwise operations to determine the current action:
-        - Bit 0 (0x01): Device is active/running
-        - Bit 1 (0x02): Heating mode flag
-        - Bit 2 (0x04): Cooling mode flag
-
         Heat pump status codes (from API documentation):
-        Code | Binary      | Meaning
-        -----|-------------|--------
-        0    | 0000 0000  | Off
-        1    | 0000 0001  | Starting up (active, no mode)
-        3    | 0000 0011  | Heating (active + heating flag)
-        5    | 0000 0101  | Cooling (active + cooling flag)
-        17   | 0001 0001  | Transitional (active + other flags)
-        19   | 0001 0011  | Heating + transition state
-        21   | 0001 0101  | Cooling + transition state
-        67   | 0100 0011  | Heating + other state
-        75   | 0100 1011  | Heating + cooling + other
-        83   | 0101 0011  | Heating + other state
+
+        Bit-Mapping:
+        Bit         | 7    | 6          | 5    | 4          | 3              | 2       | 1       | 0
+        ------------|------|------------|------|------------|----------------|---------|---------|-----
+        Value (dec) | 128  | 64         | 32   | 16         | 8              | 4       | 2       | 1
+        Value (hex) | 0x80 | 0x40       | 0x20 | 0x10       | 0x08           | 0x04    | 0x02    | 0x01
+        Meaning     | IDLE | DEFROSTING | IDLE | DRYING (?) | PREHEATING (?) | COOLING | HEATING | IDLE
 
         Reference: https://github.com/msfuture/comfoclime_api/blob/main/ComfoClimeAPI.md#heat-pump-status-codes
         """
         if not self.coordinator.data:
-            return HVACAction.OFF
+            return [HVACAction.OFF]
 
         heat_pump_status = self.coordinator.data.get("heatPumpStatus")
 
-        if heat_pump_status is None or heat_pump_status == 0:
-            return HVACAction.OFF
+        if heat_pump_status in [None, 0]:
+            return [HVACAction.OFF]
 
-        # Bitwise operation to determine heating/cooling state
-        # Bit 1 (0x02) indicates heating
-        # Bit 2 (0x04) indicates cooling
-        # If both bits are set (e.g., status 75), heating takes priority
-        # This is intentional as heating typically has higher priority for safety
-        is_heating = bool(heat_pump_status & 0x02)  # Check bit 1
-        is_cooling = bool(heat_pump_status & 0x04)  # Check bit 2
+        status_mapping = {
+            0x02: HVACAction.HEATING,
+            0x04: HVACAction.COOLING,
+            0x08: HVACAction.PREHEATING,  # Not sure
+            0x10: HVACAction.DRYING,  # Not sure
+            0x20: HVACAction.IDLE,  # Unused
+            0x40: HVACAction.DEFROSTING,  # Not sure
+            0x80: HVACAction.IDLE,  # Unused
+        }
 
-        if is_heating:
-            return HVACAction.HEATING
+        active_flags = [
+            status for mask, status in status_mapping.items() if heat_pump_status & mask
+        ]
 
-        if is_cooling:
-            return HVACAction.COOLING
+        if not active_flags:
+            return [HVACAction.IDLE]
 
-        # Device is active but not heating or cooling (starting up or idle)
-        return HVACAction.IDLE
+        return active_flags
 
     @property
     def preset_mode(self) -> str | None:
