@@ -1,4 +1,5 @@
 import logging
+from functools import partial
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
@@ -19,7 +20,49 @@ CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 _LOGGER = logging.getLogger(__name__)
 
 
+async def _async_handle_reset_system_service(hass: HomeAssistant, call: ServiceCall):
+    device_id = call.data["device_id"]
+    device = dr.async_get(hass).async_get(device_id)
+    if not device:
+        raise HomeAssistantError("Gerät nicht gefunden")
+
+    device_identifier = next(
+        (identifier for identifier in device.identifiers if identifier[0] == DOMAIN),
+        None,
+    )
+    if not device_identifier:
+        raise HomeAssistantError(f"Gerät gehört nicht zur Integration {DOMAIN}")
+
+    _, device_uuid = device_identifier
+    entries = hass.data.get(DOMAIN, {})
+    for entry_id in device.config_entries:
+        entry_data = entries.get(entry_id)
+        if not entry_data:
+            continue
+
+        main_device = entry_data.get("main_device")
+        if main_device and main_device.get("uuid") == device_uuid:
+            try:
+                await entry_data["api"].async_reset_system(hass)
+                _LOGGER.info("ComfoClime Neustart ausgelöst für %s", device_uuid)
+                return
+            except Exception as err:
+                _LOGGER.error("Fehler beim Neustart des Geräts: %s", err)
+                raise HomeAssistantError(
+                    f"Fehler beim Neustart des Geräts: {err}"
+                ) from err
+
+    raise HomeAssistantError(
+        "Das ausgewählte Gerät ist kein ComfoClime-Hauptgerät einer geladenen Instanz"
+    )
+
+
 async def async_setup(hass: HomeAssistant, config: dict):
+    hass.services.async_register(
+        DOMAIN,
+        "reset_system",
+        partial(_async_handle_reset_system_service, hass),
+    )
     return True  # wir nutzen keine YAML-Konfiguration mehr
 
 
@@ -79,16 +122,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
             _LOGGER.error(f"Fehler beim Setzen von Property {path}: {e}")
             raise HomeAssistantError(f"Fehler beim Setzen von Property {path}: {e}")
 
-    async def handle_reset_system_service(call: ServiceCall):
-        try:
-            await api.async_reset_system(hass)
-            _LOGGER.info("ComfoClime Neustart ausgelöst")
-        except Exception as e:
-            _LOGGER.error(f"Fehler beim Neustart des Geräts: {e}")
-            raise HomeAssistantError(f"Fehler beim Neustart des Geräts: {e}")
-
     hass.services.async_register(DOMAIN, "set_property", handle_set_property_service)
-    hass.services.async_register(DOMAIN, "reset_system", handle_reset_system_service)
     return True
 
 

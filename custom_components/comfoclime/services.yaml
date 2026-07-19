@@ -51,4 +51,12 @@ set_property:
           step: 0.01
 reset_system:
   name: Reset System
-  description: Startet das ComfoClime-Gerät neu.
+  description: Startet das ausgewählte ComfoClime-Gerät neu.
+  fields:
+    device_id:
+      name: Gerät
+      description: Das ComfoClime-Hauptgerät, das neu gestartet werden soll.
+      required: true
+      selector:
+        device:
+          integration: comfoclime
