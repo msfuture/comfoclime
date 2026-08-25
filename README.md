@@ -65,7 +65,23 @@ The climate entity automatically:
 
 ## Caveats
 
-With some firmware versions, the ComfoClimeAPI stops being responsive after a few days. Pressing "Reset" on the Arduino board or power cycling the device will fix it. See https://github.com/msfuture/comfoclime/issues/7.
+With some firmware versions, the ComfoClimeAPI stops being responsive after a few days. Pressing "Reset" on the Arduino board or power cycling the device will fix it. An alternative solution is to set up an automation that restarts the ComfoNet board daily: 
+
+```yaml
+alias: Reset ComfoClome Daily
+description: ''
+triggers:
+  - trigger: time
+    at: '22:00:00'
+conditions: []
+actions:
+  - action: comfoclime.reset_system
+    metadata: {}
+    data: {}
+mode: single
+```
+
+For details, see https://github.com/msfuture/comfoclime/issues/7.
 
 ## Current ToDo / development
 There are many more telemetry and property values, that make sense to be offered by the integration. The ComfoClime unit itself is fully integrated but there are some missing sensors, switches and numbers of the ComfoAirQ unit to be added in the future. You are missing one? The definitions are in seperate files in the entities folder, so you can try them yourself. If they are working you can open an issue or directly open a pull request.
