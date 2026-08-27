@@ -153,7 +153,7 @@ CONNECTED_DEVICE_SENSORS = {
         },
         {
             "telemetry_id": 4197,
-            "name": "Unknown temp 4197",
+            "name": "Heatpump internal temperature",
             "unit": "°C",
             "faktor": 0.1,
             "signed": True,
