@@ -1,285 +1,296 @@
 {
     "entity": {
-      "sensor": {
-        "indoor_temperature": {
-          "name": "Indoor Temperature"
-        },
-        "outdoor_temperature": {
-            "name": "Outdoor Temperature"
-        },
-        "exhaust_temperature": {
-            "name": "Exhaust Temperature"
-        },
-        "extract_humidity": {
-            "name": "Extract Humidity"
-        },
-        "exhaust_humidity": {
-            "name": "Exhaust Humidity"
-        },
-        "outdoor_humidity": {
-            "name": "Outdoor Humidity"
-        },
-        "supply_humidity": {
-            "name": "Supply Humidity"
-        },
-        "fan_speed": {
-            "name": "Fan Speed Level"
-        },
-        "supply_air_temperature": {
-          "name": "Supply Air Temperature"
-        },
-        "supply_coil_temperature": {
-            "name": "Supply Coil Temperature"
-        },
-        "exhaust_coil_temperature": {
-            "name": "Supply Coil Temperature"
-        },
-        "tpma_temperature": {
-            "name": "Mean Outdoor Temperature"
-        },
-        "comfo_clime_status": {
-            "name": "ComfoClime Status"
-        },
-        "current_comfort_temperature": {
-            "name": "Current Comfort Temperature"
-        },
-        "power_heatpump": {
-            "name": "Power Heatpump"
-        },
-        "power_ventilation": {
-            "name": "Power Ventilation"
-        },
-        "bypass_state": {
-            "name": "Bypass State"
-        },
-        "exhaust_fan_duty": {
-            "name": "Exhaust Fan Duty"
-        },
-        "supply_fan_duty": {
-            "name": "Supply Fan Duty"
-        },
-        "exhaust_fan_speed": {
-            "name": "Exhaust Fan Speed"
-        },
-        "supply_fan_speed": {
-            "name": "Supply Fan Speed"
-        },
-        "exhaust_air_flow": {
-            "name": "Exhaust Air Flow"
-        },
-        "supply_air_flow": {
-            "name": "Supply Air Flow"
-        },
-        "energy_ytd": {
-            "name": "Ventilation Energy Year"
-        },
-        "energy_total": {
-            "name": "Ventilation Energy Total"
-        },
-        "ventilation_disbalance": {
-            "name": "Ventilation Disbalance"
-        },
-        "heat_pump_status": {
-            "name": "Heat Pump State Code"
-        },
-        "season": {
-            "name": "Season",
-            "state": {
-                "heating": "Heating period",
-                "cooling": "Cooling period",
-                "transition": "Transitional period"
+        "sensor": {
+            "indoor_temperature": {
+                "name": "Indoor Temperature"
+            },
+            "outdoor_temperature": {
+                "name": "Outdoor Temperature"
+            },
+            "exhaust_temperature": {
+                "name": "Exhaust Temperature"
+            },
+            "extract_humidity": {
+                "name": "Extract Humidity"
+            },
+            "exhaust_humidity": {
+                "name": "Exhaust Humidity"
+            },
+            "outdoor_humidity": {
+                "name": "Outdoor Humidity"
+            },
+            "supply_humidity": {
+                "name": "Supply Humidity"
+            },
+            "fan_speed": {
+                "name": "Fan Speed Level"
+            },
+            "supply_air_temperature": {
+                "name": "Supply Air Temperature"
+            },
+            "supply_coil_temperature": {
+                "name": "Supply Coil Temperature"
+            },
+            "exhaust_coil_temperature": {
+                "name": "Supply Coil Temperature"
+            },
+            "tpma_temperature": {
+                "name": "Mean Outdoor Temperature"
+            },
+            "comfo_clime_status": {
+                "name": "ComfoClime Status"
+            },
+            "current_comfort_temperature": {
+                "name": "Current Comfort Temperature"
+            },
+            "power_heatpump": {
+                "name": "Power Heatpump"
+            },
+            "power_ventilation": {
+                "name": "Power Ventilation"
+            },
+            "bypass_state": {
+                "name": "Bypass State"
+            },
+            "exhaust_fan_duty": {
+                "name": "Exhaust Fan Duty"
+            },
+            "supply_fan_duty": {
+                "name": "Supply Fan Duty"
+            },
+            "exhaust_fan_speed": {
+                "name": "Exhaust Fan Speed"
+            },
+            "supply_fan_speed": {
+                "name": "Supply Fan Speed"
+            },
+            "exhaust_air_flow": {
+                "name": "Exhaust Air Flow"
+            },
+            "supply_air_flow": {
+                "name": "Supply Air Flow"
+            },
+            "energy_ytd": {
+                "name": "Ventilation Energy Year"
+            },
+            "energy_total": {
+                "name": "Ventilation Energy Total"
+            },
+            "ventilation_disbalance": {
+                "name": "Ventilation Disbalance"
+            },
+            "heat_pump_status": {
+                "name": "Heat Pump State Code"
+            },
+            "season": {
+                "name": "Season",
+                "state": {
+                    "heating": "Heating period",
+                    "cooling": "Cooling period",
+                    "transition": "Transitional period"
+                }
+            },
+            "temperature_profile_status": {
+                "name": "Current Temperature Profile",
+                "state": {
+                    "comfort": "Comfort",
+                    "eco": "Eco",
+                    "power": "Power"
+                }
+            },
+            "temp_rmot": {
+                "name": "Ventilation Mean Outdoor Temperature (RMOT)"
+            },
+            "device_mode_status": {
+                "name": "Current Operating Mode",
+                "state": {
+                    "0": "Off",
+                    "1": "Heating",
+                    "2": "Cooling"
+                }
+            },
+            "schedule_status": {
+                "name": "Current Schedule"
+            },
+            "dashboard_status": {
+                "name": "Status Field of the Dashboard API"
+            },
+            "device_power_status": {
+                "name": "Power Status",
+                "state": {
+                    "false": "On",
+                    "true": "Standby"
+                }
+            },
+            "free_cooling_status": {
+                "name": "Free Cooling",
+                "state": {
+                    "false": "Off",
+                    "true": "On"
+                }
+            },
+            "scenario_time_left": {
+                "name": "Scenario Time Left"
+            },
+            "scenario": {
+                "name": "Active Scenario"
             }
         },
-        "temperature_profile_status": {
-          "name": "Current Temperature Profile",
-          "state": {
-            "comfort": "Comfort",
-            "eco": "Eco",
-            "power": "Power"
-          }
-        },
-        "temp_rmot": {
-            "name": "Ventilation Mean Outdoor Temperature (RMOT)"
-        },
-        "device_mode_status": {
-          "name": "Current Operating Mode",
-          "state": {
-            "0": "Off",
-            "1": "Heating",
-            "2": "Cooling"
+        "select": {
+            "temperature_profile": {
+                "name": "Temperature Profile",
+                "state": {
+                    "comfort": "Comfort",
+                    "eco": "Eco",
+                    "power": "Power"
+                }
+            },
+            "season_mode": {
+                "name": "Season Mode",
+                "state": {
+                    "heating": "Heating period",
+                    "cooling": "Cooling period",
+                    "transition": "Transitional period"
+                }
+            },
+            "humidity_comfort_control": {
+                "name": "Ventilation Humidity Control",
+                "state": {
+                    "off": "Off",
+                    "autoonly": "Auto Only",
+                    "on": "On"
+                }
+            },
+            "humidity_protection": {
+                "name": "Ventilation Humidity Protection",
+                "state": {
+                    "off": "Off",
+                    "autoonly": "Auto Only",
+                    "on": "On"
+                }
             }
         },
-        "schedule_status": {
-            "name": "Current Schedule"
-        },
-        "dashboard_status": {
-            "name": "Status Field of the Dashboard API"
-        },
-        "device_power_status": {
-          "name": "Power Status",
-          "state": {
-            "false": "On",
-            "true": "Standby"
+        "number": {
+            "heating_comfort_temperature": {
+                "name": "Heating Comfort Temperature"
+            },
+            "heating_knee_point": {
+                "name": "Heating Curve Knee Point"
+            },
+            "heating_reduction_delta": {
+                "name": "Heating Reduction Delta"
+            },
+            "cooling_comfort_temperature": {
+                "name": "Cooling Comfort Temperature"
+            },
+            "cooling_knee_point": {
+                "name": "Cooling Curve Knee Point"
+            },
+            "cooling_temperature_limit": {
+                "name": "Cooling Temperaturelimit"
+            },
+            "manual_comfort_temperature": {
+                "name": "Manual Comfort Temperature"
+            },
+            "heating_threshold": {
+                "name": "Heating Threshold"
+            },
+            "cooling_threshold": {
+                "name": "Cooling Threshold"
+            },
+            "rmot_heating_threshold": {
+                "name": "Ventilation heating threshold RMOT"
+            },
+            "rmot_cooling_threshold": {
+                "name": "Ventilation cooling threshold RMOT"
+            },
+            "heatpump_min_temp": {
+                "name": "Heatpump minimum cooling temperature"
+            },
+            "heatpump_max_temp": {
+                "name": "Heatpumpt maximum heating temperature"
             }
         },
-        "free_cooling_status": {
-          "name": "Free Cooling",
-          "state": {
-            "false": "Off",
-            "true": "On"
-            }
-        }
-      },
-      "select": {
-        "temperature_profile": {
-          "name": "Temperature Profile",
-          "state": {
-            "comfort": "Comfort",
-            "eco": "Eco",
-            "power": "Power"
-          }
-        },
-        "season_mode": {
-            "name": "Season Mode",
-            "state": {
-                "heating": "Heating period",
-                "cooling": "Cooling period",
-                "transition": "Transitional period"
+        "switch": {
+            "automatic_season_detection": {
+                "name": "Automatic Season Detection"
+            },
+            "automatic_comfort_temperature": {
+                "name": "Automatic Comfort Temperature"
+            },
+            "heatpump_onoff": {
+                "name": "Heatpump on/off"
             }
         },
-        "humidity_comfort_control": {
-            "name": "Ventilation Humidity Control",
-            "state": {
-                "off": "Off",
-                "autoonly": "Auto Only",
-                "on": "On"
+        "fan": {
+            "fan_speed": {
+                "name": "Fan Speed",
+                "state": {
+                    "off": "Away",
+                    "low": "Low",
+                    "medium": "Medium",
+                    "high": "High"
+                }
             }
         },
-        "humidity_protection": {
-            "name": "Ventilation Humidity Protection",
-            "state": {
-                "off": "Off",
-                "autoonly": "Auto Only",
-                "on": "On"
-            }
-        }
-      },
-      "number": {
-        "heating_comfort_temperature": {
-            "name": "Heating Comfort Temperature"
-        },
-        "heating_knee_point": {
-            "name": "Heating Curve Knee Point"
-        },
-        "heating_reduction_delta": {
-            "name": "Heating Reduction Delta"
-        },
-        "cooling_comfort_temperature": {
-            "name": "Cooling Comfort Temperature"
-        },
-        "cooling_knee_point": {
-            "name": "Cooling Curve Knee Point"
-        },
-        "cooling_temperature_limit": {
-            "name": "Cooling Temperaturelimit"
-        },
-        "manual_comfort_temperature": {
-            "name": "Manual Comfort Temperature"
-        },
-        "heating_threshold": {
-            "name": "Heating Threshold"
-        },
-        "cooling_threshold": {
-            "name": "Cooling Threshold"
-        },
-        "rmot_heating_threshold": {
-            "name": "Ventilation heating threshold RMOT"
-        },
-        "rmot_cooling_threshold": {
-            "name": "Ventilation cooling threshold RMOT"
-        },
-        "heatpump_min_temp": {
-            "name": "Heatpump minimum cooling temperature"
-        },
-        "heatpump_max_temp": {
-            "name": "Heatpumpt maximum heating temperature"
-        }
-      },
-      "switch": {
-        "automatic_season_detection": {
-            "name": "Automatic Season Detection"
-        },
-        "automatic_comfort_temperature": {
-            "name": "Automatic Comfort Temperature"
-        },
-        "heatpump_onoff": {
-            "name": "Heatpump on/off"
-        }
-      },
-      "fan": {
-        "fan_speed": {
-            "name": "Fan Speed",
-            "state": {
-                "off": "Away",
-                "low": "Low",
-                "medium": "Medium",
-                "high": "High"
-            }
-        }
-      },
-      "climate": {
         "climate": {
-            "name": "Climate Control",
-            "state_attributes": {
-                "preset_mode": {
-                    "state": {
-                        "comfort": "Comfort",
-                        "power": "Power",
-                        "eco": "Eco"
-                    }
-                },
-                "fan_mode": {
-                    "state": {
-                        "off": "Off",
-                        "low": "Low",
-                        "medium": "Medium",
-                        "high": "High"
+            "climate": {
+                "name": "Climate Control",
+                "state_attributes": {
+                    "preset_mode": {
+                        "name": "Preset mode",
+                        "state": {
+                            "comfort": "Comfort",
+                            "power": "Power",
+                            "eco": "Eco",
+                            "none": "Manual",
+                            "cooking": "Cooking",
+                            "party": "Party"
+                        }
+                    },
+                    "fan_mode": {
+                        "name": "Fan mode",
+                        "state": {
+                            "off": "Off",
+                            "low": "Low",
+                            "medium": "Medium",
+                            "high": "High"
+                        }
                     }
                 }
             }
         }
-      }
     },
     "config": {
         "step": {
-          "user": {
-            "title": "Connect to Zehnder ComfoClime",
-            "description": "Enter the IP-Address or hostname of your ComfoClime unit",
-            "data": {
-              "host": "Host or IP-Address"
+            "user": {
+                "title": "Connect to Zehnder ComfoClime",
+                "description": "Enter the IP-Address or hostname of your ComfoClime unit",
+                "data": {
+                    "host": "Host or IP-Address"
+                }
             }
-          }
         },
         "error": {
             "cannot_connect": "Connection failed, cannot connect.",
             "no_uuid": "Device online, but didn't get a serial number.",
             "no_response": "Device didn't respond with valid data."
         },
-          "abort": {
+        "abort": {
             "already_configured": "This device is already configured."
         }
     },
     "options": {
         "step": {
-          "init": {
-            "title": "Options",
-            "description": "Advanced integration options",
-            "data": {
-              "enable_diagnostics": "Activate diagnosis sensors",
-              "minimal_mode": "No communication with ComfoNet Bus (testing)",
-              "throttle_comfonet": "Add a 10ms pause between ComfoNet polls"
+            "init": {
+                "title": "Options",
+                "description": "Advanced integration options",
+                "data": {
+                    "enable_diagnostics": "Activate diagnosis sensors",
+                    "minimal_mode": "No communication with ComfoNet Bus (testing)",
+                    "throttle_comfonet": "Add a 10ms pause between ComfoNet polls"
+                }
             }
-          }
         }
     }
-  }
+}
