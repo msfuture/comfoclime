@@ -1,4 +1,5 @@
 import logging
+from functools import partial
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
@@ -19,7 +20,86 @@ CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 _LOGGER = logging.getLogger(__name__)
 
 
+def _resolve_device_entry(hass: HomeAssistant, device_id: str) -> tuple[str, dict]:
+    device = dr.async_get(hass).async_get(device_id)
+    if not device:
+        raise HomeAssistantError("Gerät nicht gefunden")
+
+    device_identifier = next(
+        (identifier for identifier in device.identifiers if identifier[0] == DOMAIN),
+        None,
+    )
+    if not device_identifier:
+        raise HomeAssistantError(f"Gerät gehört nicht zur Integration {DOMAIN}")
+
+    _, device_uuid = device_identifier
+    entries = hass.data.get(DOMAIN, {})
+    for entry_id in device.config_entries:
+        entry_data = entries.get(entry_id)
+        if not isinstance(entry_data, dict) or "api" not in entry_data:
+            continue
+
+        return device_uuid, entry_data
+
+    raise HomeAssistantError(
+        "Das ausgewählte Gerät gehört zu keiner geladenen ComfoClime-Instanz"
+    )
+
+
+async def _async_handle_reset_system_service(hass: HomeAssistant, call: ServiceCall):
+    device_uuid, entry_data = _resolve_device_entry(hass, call.data["device_id"])
+
+    main_device = entry_data.get("main_device")
+    if not main_device or main_device.get("uuid") != device_uuid:
+        raise HomeAssistantError(
+            "Das ausgewählte Gerät ist kein ComfoClime-Hauptgerät einer geladenen Instanz"
+        )
+
+    try:
+        await entry_data["api"].async_reset_system(hass)
+        _LOGGER.info("ComfoClime Neustart ausgelöst für %s", device_uuid)
+    except Exception as err:
+        _LOGGER.error("Fehler beim Neustart des Geräts: %s", err)
+        raise HomeAssistantError(f"Fehler beim Neustart des Geräts: {err}") from err
+
+
+async def _async_handle_set_property_service(hass: HomeAssistant, call: ServiceCall):
+    device_uuid, entry_data = _resolve_device_entry(hass, call.data["device_id"])
+    path = call.data["path"]
+    value = call.data["value"]
+    byte_count = call.data["byte_count"]
+    signed = call.data.get("signed", True)
+    faktor = call.data.get("faktor", 1.0)
+
+    try:
+        await entry_data["api"].async_set_property_for_device(
+            hass,
+            device_uuid=device_uuid,
+            property_path=path,
+            value=value,
+            byte_count=byte_count,
+            signed=signed,
+            faktor=faktor,
+        )
+        _LOGGER.info("Property %s auf %s gesetzt für %s", path, value, device_uuid)
+    except Exception as err:
+        _LOGGER.error("Fehler beim Setzen von Property %s: %s", path, err)
+        raise HomeAssistantError(
+            f"Fehler beim Setzen von Property {path}: {err}"
+        ) from err
+
+
 async def async_setup(hass: HomeAssistant, config: dict):
+    hass.services.async_register(
+        DOMAIN,
+        "reset_system",
+        partial(_async_handle_reset_system_service, hass),
+    )
+    hass.services.async_register(
+        DOMAIN,
+        "set_property",
+        partial(_async_handle_set_property_service, hass),
+    )
     return True  # wir nutzen keine YAML-Konfiguration mehr
 
 
@@ -47,48 +127,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     await hass.config_entries.async_forward_entry_setups(
         entry, ["sensor", "switch", "number", "select", "fan", "climate"]
     )
-
-    async def handle_set_property_service(call: ServiceCall):
-        device_id = call.data["device_id"]
-        path = call.data["path"]
-        value = call.data["value"]
-        byte_count = call.data["byte_count"]
-        signed = call.data.get("signed", True)
-        faktor = call.data.get("faktor", 1.0)
-        dev_reg = dr.async_get(hass)
-        device = dev_reg.async_get(device_id)
-        if not device or not device.identifiers:
-            _LOGGER.error("Gerät nicht gefunden oder ungültig")
-            return
-        domain, device_uuid = list(device.identifiers)[0]
-        if domain != DOMAIN:
-            _LOGGER.error(f"Gerät gehört nicht zur Integration {DOMAIN}")
-            return
-        try:
-            await api.async_set_property_for_device(
-                hass,
-                device_uuid=device_uuid,
-                property_path=path,
-                value=value,
-                byte_count=byte_count,
-                signed=signed,
-                faktor=faktor,
-            )
-            _LOGGER.info(f"Property {path} auf {value} gesetzt für {device_uuid}")
-        except Exception as e:
-            _LOGGER.error(f"Fehler beim Setzen von Property {path}: {e}")
-            raise HomeAssistantError(f"Fehler beim Setzen von Property {path}: {e}")
-
-    async def handle_reset_system_service(call: ServiceCall):
-        try:
-            await api.async_reset_system(hass)
-            _LOGGER.info("ComfoClime Neustart ausgelöst")
-        except Exception as e:
-            _LOGGER.error(f"Fehler beim Neustart des Geräts: {e}")
-            raise HomeAssistantError(f"Fehler beim Neustart des Geräts: {e}")
-
-    hass.services.async_register(DOMAIN, "set_property", handle_set_property_service)
-    hass.services.async_register(DOMAIN, "reset_system", handle_reset_system_service)
     return True
 
 
