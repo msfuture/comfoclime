@@ -3,11 +3,13 @@ import asyncio
 import logging
 import time
 from datetime import datetime
-from zoneinfo import ZoneInfo
 
 import requests
+from zoneinfo import ZoneInfo
 
 _LOGGER = logging.getLogger(__name__)
+
+PRESET_TIMERS = (0x0B, 0x01, 0x06)
 
 
 class ComfoClimeAPI:
@@ -126,6 +128,27 @@ class ComfoClimeAPI:
         response = requests.get(url, timeout=5)
         response.raise_for_status()
         return response.json().get("devices", [])
+
+    async def async_get_alarms(self, hass):
+        async with self._request_lock:
+            return await hass.async_add_executor_job(self.get_alarms)
+
+    def get_alarms(self):
+        """Get reported ComfoNet alarm codes for all connected devices."""
+        if not self.uuid:
+            self.get_uuid()
+        url = f"{self.base_url}/system/{self.uuid}/alarms"
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        devices = data.get("devices")
+        if not isinstance(devices, list):
+            raise ValueError("Unexpected alarm response format")
+        return {
+            device["uuid"]: device.get("errors", [])
+            for device in devices
+            if isinstance(device, dict) and isinstance(device.get("uuid"), str)
+        }
 
     async def async_read_telemetry_for_device(
         self, hass, device_uuid, telemetry_id, faktor=1.0, signed=True, byte_count=None
@@ -287,6 +310,7 @@ class ComfoClimeAPI:
 
     def update_dashboard(
         self,
+        hass,
         set_point_temperature: float | None = None,
         fan_speed: int | None = None,
         season: int | None = None,
@@ -295,29 +319,13 @@ class ComfoClimeAPI:
         temperature_profile: int | None = None,
         season_profile: int | None = None,
         status: int | None = None,
+        scenario: int | None = None,
+        scenario_time_left: int | None = None,
     ) -> dict:
         """Update dashboard settings via API.
 
         Modern method for dashboard updates. Only fields that are provided
         (not None) will be included in the update payload.
-
-        # Android app export from @msfuture
-        payload = {
-            "@type": None,
-            "name": None,
-            "displayName": None,
-            "description": None,
-            "timestamp": datetime.datetime.now().isoformat(),
-            "status": status,
-            "setPointTemperature": set_point_temperature,
-            "temperatureProfile": temperature_profile,
-            "seasonProfile": season_profile,
-            "fanSpeed": fan_speed,
-            "scenario": None,
-            "scenarioTimeLeft": None,
-            "season": season,
-            "schedule": None,
-        }
 
         The API distinguishes between two modes:
         - Automatic mode (status=1): Uses preset profiles (seasonProfile, temperatureProfile)
@@ -332,6 +340,8 @@ class ComfoClimeAPI:
             temperature_profile: Temperature profile/preset (0=comfort, 1=boost, 2=eco)
             season_profile: Season profile/preset (0=comfort, 1=boost, 2=eco)
             status: Temperature control mode (0=manual, 1=automatic)
+            scenario: ComfoClime scenario identifier.
+            scenario_time_left: Scenario duration remaining in seconds.
 
         Returns:
             Response JSON from the API
@@ -342,8 +352,7 @@ class ComfoClimeAPI:
         if not self.uuid:
             self.get_uuid()
 
-        # Dynamically build payload; only include keys explicitly provided.
-        # payload: dict = {}
+        # Build the dashboard request with the complete schema expected by the API.
         payload: dict = {
             "@type": None,
             "name": None,
@@ -376,6 +385,10 @@ class ComfoClimeAPI:
             payload["status"] = status
         if hp_standby is not None:
             payload["hpStandby"] = hp_standby
+        if scenario is not None:
+            payload["scenario"] = scenario
+        if scenario_time_left is not None:
+            payload["scenarioTimeLeft"] = scenario_time_left
 
         if not payload:
             _LOGGER.debug(
@@ -384,7 +397,7 @@ class ComfoClimeAPI:
             return {}
 
         # Add timestamp to payload
-        tz = ZoneInfo(self.hass.config.time_zone)
+        tz = ZoneInfo(hass.config.time_zone)
         payload["timestamp"] = datetime.now(tz).isoformat()
 
         headers = {"content-type": "application/json; charset=utf-8"}
@@ -406,7 +419,7 @@ class ComfoClimeAPI:
         """Async wrapper for update_dashboard method."""
         async with self._request_lock:
             return await hass.async_add_executor_job(
-                lambda: self.update_dashboard(**kwargs)
+                lambda: self.update_dashboard(hass, **kwargs)
             )
 
     async def async_update_thermal_profile(self, hass, updates: dict):
@@ -431,7 +444,7 @@ class ComfoClimeAPI:
 
             def _update():
                 # First update dashboard to set hpStandby
-                self.update_dashboard(hp_standby=hp_standby)
+                self.update_dashboard(hass, hp_standby=hp_standby)
                 # Then update thermal profile to set season
                 if not hp_standby:  # Only set season if device is active
                     self.update_thermal_profile({"season": {"season": season}})
@@ -489,6 +502,171 @@ class ComfoClimeAPI:
                 f"Fehler beim Schreiben von Property {property_path} mit Payload {payload}"
             )
             raise
+
+    async def async_set_bypass_mode(
+        self,
+        hass,
+        device_uuid: str,
+        mode: str,
+        duration_minutes: int = 60,
+    ) -> None:
+        """Set a temporary ComfoAir Q bypass override or return to auto."""
+        async with self._request_lock:
+            await hass.async_add_executor_job(
+                self.set_bypass_mode,
+                device_uuid,
+                mode,
+                duration_minutes,
+            )
+
+    async def async_set_ventilation_mode(
+        self,
+        hass,
+        device_uuid: str,
+        mode: str,
+        duration_minutes: int = 60,
+    ) -> None:
+        """Set a temporary ComfoAir Q ventilation preset or return to auto."""
+        async with self._request_lock:
+            await hass.async_add_executor_job(
+                self.set_ventilation_mode,
+                device_uuid,
+                mode,
+                duration_minutes,
+            )
+
+    def cancel_preset_timer(self, device_uuid: str, timer: int) -> None:
+        """End an active ComfoAir Q SCHEDULE timer so it stops overriding airflow."""
+        self.call_device_method(
+            device_uuid=device_uuid,
+            unit=0x15,
+            subunit=0x01,
+            method=0x85,
+            data=[timer],
+        )
+
+    def set_ventilation_mode(
+        self,
+        device_uuid: str,
+        mode: str,
+        duration_minutes: int = 60,
+    ) -> None:
+        """Send a documented SCHEDULE timer command for a ComfoAir Q preset."""
+        if mode == "auto":
+            for timer in PRESET_TIMERS:
+                self.cancel_preset_timer(device_uuid, timer)
+            self.call_device_method(
+                device_uuid=device_uuid,
+                unit=0x15,
+                subunit=0x08,
+                method=0x85,
+                data=[0x01],  # Return airflow control to the scheduler.
+            )
+            return
+
+        if (
+            isinstance(duration_minutes, bool)
+            or not isinstance(duration_minutes, (int, float))
+            or not float(duration_minutes).is_integer()
+            or not 1 <= duration_minutes <= 1440
+        ):
+            raise ValueError("Ventilation override duration must be 1–1440 minutes")
+
+        timers_and_values = {
+            "away": (0x0B, 0x00),
+            "low": (0x01, 0x01),
+            "medium": (0x01, 0x02),
+            "high": (0x01, 0x03),
+            "boost": (0x06, 0x03),
+        }
+        try:
+            timer, value = timers_and_values[mode]
+        except KeyError as err:
+            raise ValueError(
+                "Ventilation mode must be 'auto', 'away', 'low', 'medium', "
+                "'high', or 'boost'"
+            ) from err
+
+        for other in PRESET_TIMERS:
+            if other != timer:
+                self.cancel_preset_timer(device_uuid, other)
+
+        duration_seconds = int(duration_minutes) * 60
+        self.call_device_method(
+            device_uuid=device_uuid,
+            unit=0x15,
+            subunit=0x01,
+            method=0x84,
+            data=[
+                timer,
+                0x00,
+                0x00,
+                0x00,
+                0x00,  # Start immediately (signed little-endian int32 delay).
+                *duration_seconds.to_bytes(4, byteorder="little", signed=True),
+                value,
+            ],
+        )
+
+    def set_bypass_mode(
+        self,
+        device_uuid: str,
+        mode: str,
+        duration_minutes: int = 60,
+    ) -> None:
+        """Send a documented SCHEDULE timer command for the ComfoAir Q bypass."""
+        if mode == "auto":
+            method = 0x85  # DISABLETIMERENTRY cancels the bypass override.
+            data = [0x01]  # TIMER_DEFAULT
+        elif mode in ("on", "off"):
+            if (
+                isinstance(duration_minutes, bool)
+                or not isinstance(duration_minutes, (int, float))
+                or not float(duration_minutes).is_integer()
+                or not 1 <= duration_minutes <= 1440
+            ):
+                raise ValueError("Bypass override duration must be 1–1440 minutes")
+            duration_minutes = int(duration_minutes)
+            method = 0x84  # ENABLETIMERENTRY starts a timed bypass override.
+            value = 0x01 if mode == "on" else 0x02
+            duration_seconds = duration_minutes * 60
+            data = [
+                0x01,  # TIMER_DEFAULT
+                0x00,
+                0x00,
+                0x00,
+                0x00,  # Delay: start immediately (signed little-endian int32).
+                *duration_seconds.to_bytes(4, byteorder="little", signed=True),
+                value,
+            ]
+        else:
+            raise ValueError("Bypass mode must be 'auto', 'on', or 'off'")
+
+        self.call_device_method(
+            device_uuid=device_uuid,
+            unit=0x15,  # SCHEDULE
+            subunit=0x02,  # BYPASS
+            method=method,
+            data=data,
+        )
+
+    def call_device_method(
+        self,
+        device_uuid: str,
+        unit: int,
+        subunit: int,
+        method: int,
+        data: list[int],
+    ) -> None:
+        """Call a raw ComfoNet method through the ComfoClime REST API."""
+        if not all(
+            isinstance(value, int) and not isinstance(value, bool) and 0 <= value <= 255
+            for value in (unit, subunit, method, *data)
+        ):
+            raise ValueError("Method address and payload values must be bytes")
+        url = f"{self.base_url}/device/{device_uuid}/method/{unit}/{subunit}/{method}"
+        response = requests.put(url, json={"data": data}, timeout=5)
+        response.raise_for_status()
 
     async def async_reset_system(self, hass):
         async with self._request_lock:

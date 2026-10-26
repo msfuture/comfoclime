@@ -28,7 +28,6 @@ async def async_setup_entry(
     except Exception as e:
         _LOGGER.error(f"UUID konnte nicht geladen werden: {e}")
         return
-    devices = hass.data[DOMAIN][entry.entry_id]["devices"]
     main_device = hass.data[DOMAIN][entry.entry_id]["main_device"]
 
     data = hass.data[DOMAIN][entry.entry_id]
@@ -215,9 +214,9 @@ class ComfoClimeStandbySwitch(
     def _set_status(self, value):
         try:
             if value == 0:
-                self._api.update_dashboard(hp_standby=True)
+                self._api.update_dashboard(self.hass, hp_standby=True)
             if value == 1:
-                self._api.update_dashboard(hp_standby=False)
+                self._api.update_dashboard(self.hass, hp_standby=False)
             self._state = value == 1
             self.hass.create_task(self.coordinator.async_request_refresh())
 

@@ -9,7 +9,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import DOMAIN
 from .comfoclime_api import ComfoClimeAPI
-from .coordinator import ComfoClimeDashboardCoordinator
+from .coordinator import ComfoClimeAlarmsCoordinator, ComfoClimeDashboardCoordinator
 from .entities.sensor_definitions import (
     CONNECTED_DEVICE_PROPERTIES,
     CONNECTED_DEVICE_SENSORS,
@@ -101,11 +101,21 @@ async def async_setup_entry(
         _LOGGER.warning(f"Verbundene Geräte konnten nicht geladen werden: {e}")
         devices = []
 
+    primary_device_uuid_by_model = {}
+    for device in devices:
+        model_id = device.get("modelTypeId")
+        device_uuid = device.get("uuid")
+        if device_uuid not in (None, "NULL"):
+            primary_device_uuid_by_model.setdefault(model_id, device_uuid)
+
     for device in devices:
         model_id = device.get("modelTypeId")
         dev_uuid = device.get("uuid")
         if dev_uuid == "NULL":
             continue
+        unique_id_suffix = (
+            None if primary_device_uuid_by_model.get(model_id) == dev_uuid else dev_uuid
+        )
 
         sensor_defs = CONNECTED_DEVICE_SENSORS.get(model_id)
         if not sensor_defs:
@@ -134,6 +144,7 @@ async def async_setup_entry(
                                 device=device,
                                 state_class=sensor_def.get("state_class"),
                                 override_device_uuid=dev_uuid,
+                                unique_id_suffix=unique_id_suffix,
                                 entry=entry,
                             )
                         ]
@@ -158,10 +169,19 @@ async def async_setup_entry(
                     mapping_key=prop_def.get("mapping_key", ""),
                     device=device,
                     override_device_uuid=dev_uuid,
+                    unique_id_suffix=unique_id_suffix,
                     entry=entry,
                 )
                 for prop_def in property_defs
             )
+
+    alarm_coordinator = data.get("alarms_coordinator")
+    if alarm_coordinator is not None:
+        sensors.extend(
+            ComfoClimeReportedAlarmSensor(entry, alarm_coordinator, device)
+            for device in devices
+            if device.get("uuid") not in (None, "NULL")
+        )
     async_add_entities(sensors, True)
 
 
@@ -235,6 +255,57 @@ class ComfoClimeSensor(CoordinatorEntity[ComfoClimeDashboardCoordinator], Sensor
         self.async_write_ha_state()
 
 
+class ComfoClimeReportedAlarmSensor(
+    CoordinatorEntity[ComfoClimeAlarmsCoordinator], SensorEntity
+):
+    """Count the non-zero alarm codes reported for one connected device."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "reported_alarm_count"
+    _attr_native_unit_of_measurement = "errors"
+    _attr_state_class = "measurement"
+
+    def __init__(self, entry: ConfigEntry, coordinator, device: dict) -> None:
+        super().__init__(coordinator)
+        self._device = device
+        self._attr_config_entry_id = entry.entry_id
+        self._attr_unique_id = f"{entry.entry_id}_{device['uuid']}_reported_alarm_count"
+
+    @property
+    def native_value(self) -> int | None:
+        """Return the number of non-zero reported error codes."""
+        if self.coordinator.data is None:
+            return None
+        errors = self.coordinator.data.get(self._device["uuid"])
+        if not isinstance(errors, list):
+            return None
+        return sum(value not in (None, 0) for value in errors)
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Expose the reported non-zero codes for further inspection."""
+        if self.coordinator.data is None:
+            return {}
+        errors = self.coordinator.data.get(self._device["uuid"])
+        if not isinstance(errors, list):
+            return {}
+        return {
+            "reported_error_codes": [
+                value for value in errors if value not in (None, 0)
+            ]
+        }
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        return DeviceInfo(
+            identifiers={(DOMAIN, self._device["uuid"])},
+            name=self._device.get("displayName", "ComfoClime Device"),
+            manufacturer="Zehnder",
+            model=self._device.get("@modelType"),
+            sw_version=self._device.get("version"),
+        )
+
+
 class ComfoClimeTelemetrySensor(SensorEntity):
     def __init__(
         self,
@@ -251,6 +322,7 @@ class ComfoClimeTelemetrySensor(SensorEntity):
         device=None,
         state_class=None,
         override_device_uuid=None,
+        unique_id_suffix=None,
         entry=None,
     ):
         self._hass = hass
@@ -269,6 +341,8 @@ class ComfoClimeTelemetrySensor(SensorEntity):
         self._entry = entry
         self._attr_config_entry_id = entry.entry_id
         self._attr_unique_id = f"{entry.entry_id}_telemetry_{telemetry_id}"
+        if unique_id_suffix:
+            self._attr_unique_id += f"_{unique_id_suffix}"
         if not translation_key:
             self._attr_name = name
         else:
@@ -326,6 +400,7 @@ class ComfoClimePropertySensor(SensorEntity):
         device: dict | None = None,
         override_device_uuid: str | None = None,
         entry: ConfigEntry,
+        unique_id_suffix: str | None = None,
     ):
         self._hass = hass
         self._api = api
@@ -343,6 +418,8 @@ class ComfoClimePropertySensor(SensorEntity):
         self._state = None
         self._attr_config_entry_id = entry.entry_id
         self._attr_unique_id = f"{entry.entry_id}_property_{path.replace('/', '_')}"
+        if unique_id_suffix:
+            self._attr_unique_id += f"_{unique_id_suffix}"
         if not translation_key:
             self._attr_name = name
         else:

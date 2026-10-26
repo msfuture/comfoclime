@@ -153,7 +153,8 @@ CONNECTED_DEVICE_SENSORS = {
         },
         {
             "telemetry_id": 4197,
-            "name": "Unknown temp 4197",
+            "name": "Heatpump Compressor Temperature",
+            "translation_key": "heatpump_compressor_temperature",
             "unit": "°C",
             "faktor": 0.1,
             "signed": True,
@@ -271,6 +272,15 @@ CONNECTED_DEVICE_SENSORS = {
             "unit": "kWh",
             "device_class": "energy",
             "state_class": "total_increasing",
+        },
+        {
+            "telemetry_id": 192,
+            "name": "Days Until Filter Replacement",
+            "translation_key": "days_until_filter_replacement",
+            "unit": "d",
+            "byte_count": 2,
+            "signed": False,
+            "state_class": "measurement",
         },
         {
             "telemetry_id": 209,

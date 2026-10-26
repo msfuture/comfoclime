@@ -176,7 +176,7 @@ class ComfoClimeTemperatureNumber(
 
                 if automatic_temperature_status == 1:
                     _LOGGER.warning(
-                        f"Cannot set manual temperature: automatic comfort temperature is enabled"
+                        "Cannot set manual temperature: automatic comfort temperature is enabled"
                     )
                     # Don't proceed with setting the temperature
                     return

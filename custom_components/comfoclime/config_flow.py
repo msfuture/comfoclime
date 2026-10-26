@@ -1,5 +1,3 @@
-import asyncio
-
 import aiohttp
 import voluptuous as vol
 
@@ -65,12 +63,6 @@ class ComfoClimeOptionsFlow(OptionsFlow):
                     vol.Optional(
                         "enable_diagnostics",
                         default=self.entry.options.get("enable_diagnostics", False),
-                    ): bool,
-                    vol.Optional(
-                        "enable_frequent_updates",
-                        default=self.entry.options.get(
-                            "enable_frequent_updates", False
-                        ),
                     ): bool,
                     vol.Optional(
                         "minimal_mode",

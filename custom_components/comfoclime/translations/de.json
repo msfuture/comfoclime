@@ -34,6 +34,9 @@
         "exhaust_coil_temperature": {
             "name": "Abluft Gastemperatur"
         },
+        "heatpump_compressor_temperature": {
+            "name": "Wärmepumpen-Verdichtertemperatur"
+        },
         "tpma_temperature": {
             "name": "Mittlere Außentemperatur"
         },
@@ -125,6 +128,17 @@
             "false": "Aus",
             "true": "An"
             }
+        },
+        "days_until_filter_replacement": {
+          "name": "Tage bis Filterwechsel"
+        },
+        "reported_alarm_count": {
+          "name": "Gemeldete Fehleranzahl"
+        }
+      },
+      "binary_sensor": {
+        "active_cooling_available": {
+          "name": "Passive Kühlung verfügbar"
         }
       },
       "select": {
@@ -232,7 +246,11 @@
                     "state": {
                         "comfort": "Komfort",
                         "power": "Power",
-                        "eco": "Eco"
+                        "eco": "Eco",
+                        "cooking": "Kochen",
+                        "party": "Party",
+                        "holiday": "Urlaub",
+                        "scenario_boost": "Szenario-Boost"
                     }
                 },
                 "fan_mode": {

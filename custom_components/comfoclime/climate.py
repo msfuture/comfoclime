@@ -20,6 +20,7 @@ from homeassistant.components.climate import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -29,6 +30,11 @@ from .comfoclime_api import ComfoClimeAPI
 from .coordinator import (
     ComfoClimeDashboardCoordinator,
     ComfoClimeThermalprofileCoordinator,
+)
+from .scenarios import (
+    SCENARIO_DEFAULT_DURATIONS_MINUTES,
+    SCENARIO_VALUES,
+    async_activate_scenario,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -148,7 +154,11 @@ class ComfoClimeClimate(
         self._attr_hvac_modes = list(HVAC_MODE_REVERSE_MAPPING.keys())
 
         # Preset modes (automatic profiles + manual mode)
-        self._attr_preset_modes = [PRESET_MANUAL] + list(PRESET_REVERSE_MAPPING.keys())
+        self._attr_preset_modes = (
+            [PRESET_MANUAL]
+            + list(PRESET_REVERSE_MAPPING.keys())
+            + list(SCENARIO_VALUES)
+        )
 
         # Fan modes
         self._attr_fan_modes = list(FAN_MODE_REVERSE_MAPPING.keys())
@@ -310,6 +320,26 @@ class ComfoClimeClimate(
         if not self.coordinator.data:
             return None
 
+        scenario = self.coordinator.data.get("scenario")
+        scenario_time_left = self.coordinator.data.get("scenarioTimeLeft")
+        try:
+            scenario = int(scenario)
+            scenario_time_left = float(scenario_time_left)
+        except (TypeError, ValueError):
+            pass
+        else:
+            if scenario_time_left > 0:
+                scenario_mode = next(
+                    (
+                        mode
+                        for mode, value in SCENARIO_VALUES.items()
+                        if value == scenario
+                    ),
+                    None,
+                )
+                if scenario_mode:
+                    return scenario_mode
+
         # Check if in manual mode by presence of setPointTemperature
         # or explicit status field (status=0 means manual mode)
         set_point = self.coordinator.data.get("setPointTemperature")
@@ -466,6 +496,13 @@ class ComfoClimeClimate(
         both seasonProfile and temperatureProfile set to the selected preset value.
         """
         try:
+            if preset_mode in SCENARIO_VALUES:
+                await self.async_set_scenario_mode(
+                    preset_mode,
+                    SCENARIO_DEFAULT_DURATIONS_MINUTES[preset_mode],
+                )
+                return
+
             # Manual mode: User wants to use manual temperature control
             if preset_mode == PRESET_MANUAL:
                 _LOGGER.debug(
@@ -505,8 +542,49 @@ class ComfoClimeClimate(
             # Schedule non-blocking refresh of coordinators
             await self._async_refresh_coordinators()
 
-        except Exception:
+        except Exception as err:
             _LOGGER.exception(f"Failed to set preset mode {preset_mode}")
+            if preset_mode in SCENARIO_VALUES:
+                raise HomeAssistantError(
+                    f"Failed to set ComfoClime scenario {preset_mode}: {err}"
+                ) from err
+
+    async def async_set_scenario_mode(
+        self, scenario_mode: str, duration_minutes: int
+    ) -> None:
+        """Activate one of the temporary ComfoClime ventilation scenarios."""
+        if scenario_mode not in SCENARIO_VALUES:
+            raise HomeAssistantError(
+                f"Unsupported ComfoClime scenario: {scenario_mode}"
+            )
+        if (
+            isinstance(duration_minutes, bool)
+            or not isinstance(duration_minutes, int)
+            or not 1 <= duration_minutes <= 1440
+        ):
+            raise HomeAssistantError(
+                "Scenario duration must be between 1 and 1440 minutes"
+            )
+
+        try:
+            activated = await async_activate_scenario(
+                self._api,
+                self.coordinator,
+                self.hass,
+                SCENARIO_VALUES[scenario_mode],
+                duration_minutes,
+            )
+        except Exception as err:
+            _LOGGER.exception("Failed to set scenario mode %s", scenario_mode)
+            raise HomeAssistantError(
+                f"Failed to set ComfoClime scenario {scenario_mode}: {err}"
+            ) from err
+
+        if not activated:
+            raise HomeAssistantError(
+                f"ComfoClime did not activate scenario {scenario_mode}. "
+                "An active scenario may need to finish before another can start."
+            )
 
     async def async_set_fan_mode(self, fan_mode: str) -> None:
         """Set fan mode by updating fan speed via dashboard API.
@@ -546,6 +624,14 @@ class ComfoClimeClimate(
         # Add complete dashboard data from Dashboard API interface
         if self.coordinator.data:
             attrs["dashboard"] = self.coordinator.data
+            scenario_time_left = self.coordinator.data.get("scenarioTimeLeft")
+            if isinstance(scenario_time_left, (int, float)):
+                attrs["scenario_time_left"] = scenario_time_left
+                hours, remainder = divmod(int(scenario_time_left), 3600)
+                minutes, seconds = divmod(remainder, 60)
+                attrs["scenario_time_left_formatted"] = (
+                    f"{hours}h {minutes}m" if hours else f"{minutes}m {seconds}s"
+                )
 
         # For transparency: expose last_manual_temperature from thermal profile if available
         tp = getattr(self._thermalprofile_coordinator, "data", None) or {}

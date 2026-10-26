@@ -34,6 +34,9 @@
         "exhaust_coil_temperature": {
             "name": "Supply Coil Temperature"
         },
+        "heatpump_compressor_temperature": {
+            "name": "Heat Pump Compressor Temperature"
+        },
         "tpma_temperature": {
             "name": "Mean Outdoor Temperature"
         },
@@ -128,6 +131,17 @@
             "false": "Off",
             "true": "On"
             }
+        },
+        "days_until_filter_replacement": {
+          "name": "Days Until Filter Replacement"
+        },
+        "reported_alarm_count": {
+          "name": "Reported Alarm Count"
+        }
+      },
+      "binary_sensor": {
+        "active_cooling_available": {
+          "name": "Passive Cooling Available"
         }
       },
       "select": {
@@ -235,7 +249,11 @@
                     "state": {
                         "comfort": "Comfort",
                         "power": "Power",
-                        "eco": "Eco"
+                        "eco": "Eco",
+                        "cooking": "Cooking",
+                        "party": "Party",
+                        "holiday": "Holiday",
+                        "scenario_boost": "Scenario Boost"
                     }
                 },
                 "fan_mode": {

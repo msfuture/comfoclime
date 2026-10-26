@@ -52,3 +52,110 @@ set_property:
 reset_system:
   name: Reset System
   description: Startet das ComfoClime-Gerät neu.
+  fields:
+    device_id:
+      name: Gerät
+      description: Das ComfoClime-Hauptgerät, das neu gestartet werden soll.
+      required: false
+      selector:
+        device:
+          integration: comfoclime
+
+set_scenario_mode:
+  name: ComfoClime-scenario instellen
+  description: Activeert een tijdelijk scenario op het ComfoClime-hoofdapparaat.
+  fields:
+    device_id:
+      name: Gerät
+      description: Kies het ComfoClime-hoofdapparaat; optioneel als er één is ingesteld.
+      required: false
+      selector:
+        device:
+          integration: comfoclime
+    scenario:
+      name: Scenario
+      required: true
+      selector:
+        select:
+          options:
+            - cooking
+            - party
+            - holiday
+            - scenario_boost
+    duration:
+      name: Duur
+      description: Duur in minuten; standaard 30 minuten, of 24 uur voor vakantie.
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 1440
+          step: 1
+          unit_of_measurement: min
+
+set_bypass_mode:
+  name: Bypassstand instellen
+  description: Zet de ComfoAir Q-bypass tijdelijk open of dicht, of herstel automatische regeling.
+  fields:
+    device_id:
+      name: ComfoAir Q
+      description: Kies de ComfoAir Q die via ComfoClime verbonden is; optioneel als er precies één is.
+      required: false
+      selector:
+        device:
+          integration: comfoclime
+    mode:
+      name: Stand
+      required: true
+      selector:
+        select:
+          options:
+            - auto
+            - "on"
+            - "off"
+    duration:
+      name: Duur
+      description: Tijdelijke duur voor aan of uit; automatische stand annuleert de tijdelijke override.
+      required: false
+      default: 60
+      selector:
+        number:
+          min: 1
+          max: 1440
+          step: 1
+          unit_of_measurement: min
+
+set_ventilation_mode:
+  name: Ventilatiestand instellen
+  description: Zet tijdelijk een ventilatiestand, Away of Boost op een verbonden ComfoAir Q, of hervat het weekprogramma.
+  fields:
+    device_id:
+      name: ComfoAir Q
+      description: Kies de ComfoAir Q die via ComfoClime verbonden is; optioneel als er precies één is.
+      required: false
+      selector:
+        device:
+          integration: comfoclime
+    mode:
+      name: Stand
+      required: true
+      selector:
+        select:
+          options:
+            - auto
+            - away
+            - low
+            - medium
+            - high
+            - boost
+    duration:
+      name: Duur
+      description: Tijdelijke duur in minuten. Auto annuleert overrides en hervat de ingestelde regeling.
+      required: false
+      default: 60
+      selector:
+        number:
+          min: 1
+          max: 1440
+          step: 1
+          unit_of_measurement: min
