@@ -153,7 +153,8 @@ CONNECTED_DEVICE_SENSORS = {
         },
         {
             "telemetry_id": 4197,
-            "name": "Unknown temp 4197",
+            "name": "Heatpump compressor temperature",
+            "translation_key": "heatpump_compressor_temperature",
             "unit": "°C",
             "faktor": 0.1,
             "signed": True,
